@@ -1,11 +1,10 @@
+/* eslint-disable import/no-cycle */
 import {Link} from 'react-router-dom'
-
 import './index.css'
 
 const SimilarProductItem = props => {
   const {productDetails} = props
   const {title, brand, imageUrl, rating, price, id} = productDetails
-
   return (
     <li className="similar-product-item">
       <Link to={`/products/${id}`} className="link-item">

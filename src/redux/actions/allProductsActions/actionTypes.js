@@ -1,0 +1,13 @@
+export const API_SUCCESS = 'API_SUCCESS'
+
+export const API_FAILURE = 'API_FAILURE'
+
+export const API_IN_PROGRESS = 'API_IN_PROGRESS'
+
+export const ACTIVE_OPTION_ID = 'ACTIVE_OPTION_ID'
+
+export const ACTIVE_CATEGORY_ID = 'ACTIVE_CATEGORY_ID'
+
+export const SEARCH_INPUT = 'SEARCH_INPUT'
+
+export const ACTIVE_RATING_ID = 'ACTIVE_RATING_ID'

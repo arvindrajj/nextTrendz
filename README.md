@@ -91,20 +91,6 @@ The app must have the following functionalities
 <summary>Implementation Files</summary>
 <br/>
 
-Use these files to complete the implementation:
-
-- `src/App.js`
-- `src/components/Cart/index.js`
-- `src/components/Cart/index.css`
-- `src/components/CartItem/index.js`
-- `src/components/CartItem/index.css`
-- `src/components/CartSummary/index.js`
-- `src/components/CartSummary/index.css`
-</details>
-
-### Quick Tips
-
-<details>
 <summary>Click to view</summary>
 <br>
 

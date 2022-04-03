@@ -1,12 +1,27 @@
-import {Component} from 'react'
+/* eslint-disable react-hooks/exhaustive-deps */
+import {useEffect} from 'react'
 import Loader from 'react-loader-spinner'
-import Cookies from 'js-cookie'
-
+import {useSelector, useDispatch} from 'react-redux'
 import FiltersGroup from '../FiltersGroup'
 import ProductCard from '../ProductCard'
 import ProductsHeader from '../ProductsHeader'
 
+import {
+  getProducts,
+  changeActiveOptionId,
+  changeActiveCategoryId,
+  changeSearchInput,
+  changeActiveRatingId,
+} from '../../redux/actions/allProductsActions/index'
+
 import './index.css'
+
+const apiStatusConstants = {
+  initial: 'INITIAL',
+  success: 'SUCCESS',
+  failure: 'FAILURE',
+  inProgress: 'IN_PROGRESS',
+}
 
 const categoryOptions = [
   {
@@ -65,74 +80,32 @@ const ratingsList = [
   },
 ]
 
-const apiStatusConstants = {
-  initial: 'INITIAL',
-  success: 'SUCCESS',
-  failure: 'FAILURE',
-  inProgress: 'IN_PROGRESS',
-}
+const AllProductsSection = () => {
+  const dispatch = useDispatch()
+  const activeOptionId = useSelector(
+    state => state.allProductsState.activeOptionId,
+  )
+  const activeCategoryId = useSelector(
+    state => state.allProductsState.activeCategoryId,
+  )
+  const activeRatingId = useSelector(
+    state => state.allProductsState.activeRatingId,
+  )
 
-class AllProductsSection extends Component {
-  state = {
-    productsList: [],
-    apiStatus: apiStatusConstants.initial,
-    activeOptionId: sortbyOptions[0].optionId,
-    activeCategoryId: '',
-    searchInput: '',
-    activeRatingId: '',
-  }
+  useEffect(() => {
+    dispatch(getProducts())
+  }, [activeCategoryId, activeRatingId, activeOptionId])
 
-  componentDidMount() {
-    this.getProducts()
-  }
-
-  getProducts = async () => {
-    this.setState({
-      apiStatus: apiStatusConstants.inProgress,
-    })
-    const jwtToken = Cookies.get('jwt_token')
-    const {
-      activeOptionId,
-      activeCategoryId,
-      searchInput,
-      activeRatingId,
-    } = this.state
-    const apiUrl = `https://apis.ccbp.in/products?sort_by=${activeOptionId}&category=${activeCategoryId}&title_search=${searchInput}&rating=${activeRatingId}`
-    const options = {
-      headers: {
-        Authorization: `Bearer ${jwtToken}`,
-      },
-      method: 'GET',
-    }
-    const response = await fetch(apiUrl, options)
-    if (response.ok) {
-      const fetchedData = await response.json()
-      const updatedData = fetchedData.products.map(product => ({
-        title: product.title,
-        brand: product.brand,
-        price: product.price,
-        id: product.id,
-        imageUrl: product.image_url,
-        rating: product.rating,
-      }))
-      this.setState({
-        productsList: updatedData,
-        apiStatus: apiStatusConstants.success,
-      })
-    } else {
-      this.setState({
-        apiStatus: apiStatusConstants.failure,
-      })
-    }
-  }
-
-  renderLoadingView = () => (
+  const productsList = useSelector(state => state.allProductsState.productsList)
+  const apiStatus = useSelector(state => state.allProductsState.apiStatus)
+  const searchInput = useSelector(state => state.allProductsState.searchInput)
+  const renderLoadingView = () => (
     <div className="products-loader-container">
       <Loader type="ThreeDots" color="#0b69ff" height="50" width="50" />
     </div>
   )
 
-  renderFailureView = () => (
+  const renderFailureView = () => (
     <div className="products-error-view-container">
       <img
         src="https://assets.ccbp.in/frontend/react-js/nxt-trendz/nxt-trendz-products-error-view.png"
@@ -148,12 +121,7 @@ class AllProductsSection extends Component {
     </div>
   )
 
-  changeSortby = activeOptionId => {
-    this.setState({activeOptionId}, this.getProducts)
-  }
-
-  renderProductsListView = () => {
-    const {productsList, activeOptionId} = this.state
+  const renderProductsListView = () => {
     const shouldShowProductsList = productsList.length > 0
 
     return shouldShowProductsList ? (
@@ -161,7 +129,7 @@ class AllProductsSection extends Component {
         <ProductsHeader
           activeOptionId={activeOptionId}
           sortbyOptions={sortbyOptions}
-          changeSortby={this.changeSortby}
+          changeSortby={optionId => dispatch(changeActiveOptionId(optionId))}
         />
         <ul className="products-list">
           {productsList.map(product => (
@@ -184,69 +152,43 @@ class AllProductsSection extends Component {
     )
   }
 
-  renderAllProducts = () => {
-    const {apiStatus} = this.state
-
+  const renderAllProducts = () => {
     switch (apiStatus) {
       case apiStatusConstants.success:
-        return this.renderProductsListView()
+        return renderProductsListView()
       case apiStatusConstants.failure:
-        return this.renderFailureView()
+        return renderFailureView()
       case apiStatusConstants.inProgress:
-        return this.renderLoadingView()
+        return renderLoadingView()
       default:
         return null
     }
   }
 
-  clearFilters = () => {
-    this.setState(
-      {
-        searchInput: '',
-        activeCategoryId: '',
-        activeRatingId: '',
-      },
-      this.getProducts,
-    )
+  const clearFilters = () => {
+    dispatch(changeActiveRatingId(''))
+    dispatch(changeActiveCategoryId(''))
+    dispatch(changeSearchInput(''))
   }
-
-  changeRating = activeRatingId => {
-    this.setState({activeRatingId}, this.getProducts)
-  }
-
-  changeCategory = activeCategoryId => {
-    this.setState({activeCategoryId}, this.getProducts)
-  }
-
-  enterSearchInput = () => {
-    this.getProducts()
-  }
-
-  changeSearchInput = searchInput => {
-    this.setState({searchInput})
-  }
-
-  render() {
-    const {activeCategoryId, searchInput, activeRatingId} = this.state
-
-    return (
-      <div className="all-products-section">
-        <FiltersGroup
-          searchInput={searchInput}
-          categoryOptions={categoryOptions}
-          ratingsList={ratingsList}
-          changeSearchInput={this.changeSearchInput}
-          enterSearchInput={this.enterSearchInput}
-          activeCategoryId={activeCategoryId}
-          activeRatingId={activeRatingId}
-          changeCategory={this.changeCategory}
-          changeRating={this.changeRating}
-          clearFilters={this.clearFilters}
-        />
-        {this.renderAllProducts()}
-      </div>
-    )
-  }
+  return (
+    <div className="all-products-section">
+      <FiltersGroup
+        searchInput={searchInput}
+        categoryOptions={categoryOptions}
+        ratingsList={ratingsList}
+        changeSearchInput={input => dispatch(changeSearchInput(input))}
+        enterSearchInput={() => dispatch(getProducts())}
+        activeCategoryId={activeCategoryId}
+        activeRatingId={activeRatingId}
+        changeCategory={categoryId =>
+          dispatch(changeActiveCategoryId(categoryId))
+        }
+        changeRating={ratingId => dispatch(changeActiveRatingId(ratingId))}
+        clearFilters={clearFilters}
+      />
+      {renderAllProducts()}
+    </div>
+  )
 }
 
 export default AllProductsSection
