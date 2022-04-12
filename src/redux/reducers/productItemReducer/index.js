@@ -12,6 +12,8 @@ const apiStatusConstants = {
 
 const cartItemList = JSON.parse(localStorage.getItem('cartList'))
 const cartList = cartItemList === null ? [] : cartItemList
+const browserHistoryList = JSON.parse(localStorage.getItem('browserHistory'))
+const browserHistory = browserHistoryList === null ? [] : browserHistoryList
 
 const initialState = {
   productData: {},
@@ -19,10 +21,11 @@ const initialState = {
   apiStatus: apiStatusConstants.initial,
   quantity: 1,
   cartList,
+  browserHistory,
 }
 
-const setLocalStorage = value => {
-  localStorage.setItem('cartList', JSON.stringify(value))
+const setLocalStorage = (key, value) => {
+  localStorage.setItem(key, JSON.stringify(value))
 }
 
 const getFormattedData = data => ({
@@ -113,11 +116,11 @@ const productItemSlice = createSlice({
       } else {
         newCartList = [...state.cartList, productItem]
       }
-      setLocalStorage(newCartList)
+      setLocalStorage('cartList', newCartList)
       return {...state, cartList: newCartList}
     },
     removeAllCartItems: state => {
-      setLocalStorage([])
+      setLocalStorage('cartList', [])
       return {...state, cartList: []}
     },
     incrementCartItemQuantity: (state, action) => {
@@ -128,8 +131,32 @@ const productItemSlice = createSlice({
         }
         return each
       })
-      setLocalStorage(newCartList)
+      setLocalStorage('cartList', newCartList)
       return {...state, cartList: newCartList}
+    },
+    addBrowserHistory: (state, action) => {
+      const productItem = action.payload
+      const isProductIncludes = state.browserHistory.some(
+        each => each.id === productItem.id,
+      )
+      let newBrowserHistory = state.browserHistory
+      if (!isProductIncludes) {
+        newBrowserHistory = [...state.browserHistory, productItem]
+      }
+      setLocalStorage('browserHistory', newBrowserHistory)
+      return {...state, browserHistory: newBrowserHistory}
+    },
+    removeBrowserHistoryItem: (state, action) => {
+      const id = action.payload
+      const newBrowserHistory = state.browserHistory.filter(
+        each => each.id !== id,
+      )
+      setLocalStorage('browserHistory', newBrowserHistory)
+      return {...state, browserHistory: newBrowserHistory}
+    },
+    removeAllBrowserHistory: state => {
+      setLocalStorage('browserHistory', [])
+      return {...state, browserHistory: []}
     },
   },
   extraReducers: {
@@ -141,13 +168,13 @@ const productItemSlice = createSlice({
         }
         return each
       })
-      setLocalStorage(newCartList)
+      setLocalStorage('cartList', newCartList)
       return {...state, cartList: newCartList}
     },
     [removeCartItem]: (state, action) => {
       const id = action.payload
       const newCartList = state.cartList.filter(each => each.id !== id)
-      setLocalStorage(newCartList)
+      setLocalStorage('cartList', newCartList)
       return {...state, cartList: newCartList}
     },
     [getProductData.pending]: state => ({
@@ -174,4 +201,7 @@ export const {
   addToCart,
   removeAllCartItems,
   incrementCartItemQuantity,
+  addBrowserHistory,
+  removeBrowserHistoryItem,
+  removeAllBrowserHistory,
 } = productItemSlice.actions

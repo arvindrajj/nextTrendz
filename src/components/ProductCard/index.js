@@ -1,14 +1,21 @@
 import {Link} from 'react-router-dom'
+import {useDispatch} from 'react-redux'
+import {addBrowserHistory} from '../../redux/reducers/productItemReducer'
 
 import './index.css'
 
 const ProductCard = props => {
   const {productData} = props
   const {title, brand, imageUrl, rating, price, id} = productData
+  const dispatch = useDispatch()
 
   return (
     <li className="product-item">
-      <Link to={`/products/${id}`} className="link-item">
+      <Link
+        to={`/products/${id}`}
+        className="link-item"
+        onClick={() => dispatch(addBrowserHistory(productData))}
+      >
         <img src={imageUrl} alt="product" className="thumbnail" />
         <h1 className="title">{title}</h1>
         <p className="brand">by {brand}</p>

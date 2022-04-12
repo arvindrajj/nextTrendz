@@ -5,12 +5,13 @@ import {useSelector, useDispatch} from 'react-redux'
 import Loader from 'react-loader-spinner'
 import {BsPlusSquare, BsDashSquare} from 'react-icons/bs'
 import Header from '../Header'
-import SimilarProductItem from '../SimilarProductItem'
+import ProductItem from '../ProductItem'
 import {
   getProductData,
   onIncrementQuantity,
   onDecrementQuantity,
   addToCart,
+  removeAllBrowserHistory,
 } from '../../redux/reducers/productItemReducer/index'
 
 import './index.css'
@@ -37,6 +38,9 @@ const ProductItemDetails = props => {
   const productData = useSelector(state => state.productItemState.productData)
   const similarProductsData = useSelector(
     state => state.productItemState.similarProductsData,
+  )
+  const browserHistory = useSelector(
+    state => state.productItemState.browserHistory,
   )
   const apiStatus = useSelector(state => state.productItemState.apiStatus)
   const cartQuantity = useSelector(state => state.productItemState.quantity)
@@ -139,9 +143,30 @@ const ProductItemDetails = props => {
         <h1 className="similar-products-heading">Similar Products</h1>
         <ul className="similar-products-list">
           {similarProductsData.map(eachSimilarProduct => (
-            <SimilarProductItem
+            <ProductItem
               productDetails={eachSimilarProduct}
               key={eachSimilarProduct.id}
+            />
+          ))}
+        </ul>
+        {browserHistory.length > 0 && (
+          <div className="browser-history-header">
+            <h1 className="browsing-history-heading">Browsing History</h1>
+            <button
+              type="button"
+              className="remove-all-history-button"
+              onClick={() => dispatch(removeAllBrowserHistory())}
+            >
+              Remove all items from view
+            </button>
+          </div>
+        )}
+        <ul className="browsing-history-list">
+          {browserHistory.map(eachBrowserHistory => (
+            <ProductItem
+              browserHistory
+              productDetails={eachBrowserHistory}
+              key={eachBrowserHistory.id}
             />
           ))}
         </ul>

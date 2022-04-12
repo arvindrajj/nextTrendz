@@ -70,3 +70,22 @@
   height: 14px;
   width: 14px;
 }
+
+.remove-history-button {
+  cursor: pointer;
+  color: #3d3a3a;
+  font-size: 13px;
+  width: 80%;
+  align-self: center;
+  max-width: 155px;
+  height: 24px;
+  border-radius: 7px;
+  border: 1px solid #bfbfbf;
+  background-color: transparent;
+}
+@media all and (max-width: 768px) {
+  .remove-history-button {
+    align-self: flex-start;
+    text-align: center;
+  }
+}
